@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="surface" x1="12" y1="12" x2="116" y2="116" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1689F8"/>
+      <stop offset="1" stop-color="#625DE8"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="24" y1="24" x2="102" y2="92" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity=".98"/>
+      <stop offset="1" stop-color="#EAF3FF" stop-opacity=".94"/>
+    </linearGradient>
+    <filter id="shadow" x="14" y="19" width="101" height="103" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+  <rect x="3" y="3" width="122" height="122" rx="34" fill="url(#surface)"/>
+  <circle cx="104" cy="24" r="26" fill="#FFFFFF" fill-opacity=".12"/>
+  <rect x="22" y="27" width="84" height="65" rx="16" fill="#102E60" fill-opacity=".24" filter="url(#shadow)"/>
+  <rect x="21" y="22" width="86" height="67" rx="16" fill="url(#glass)"/>
+  <path d="M21 38h86v-1a15 15 0 0 0-15-15H36a15 15 0 0 0-15 15v1Z" fill="#DCEBFF"/>
+  <circle cx="33" cy="31" r="2.5" fill="#6496E8"/>
+  <circle cx="42" cy="31" r="2.5" fill="#85ADEB"/>
+  <circle cx="51" cy="31" r="2.5" fill="#A4C1EC"/>
+  <rect x="32" y="49" width="44" height="5" rx="2.5" fill="#7EA8E9"/>
+  <rect x="32" y="61" width="56" height="4" rx="2" fill="#C2D5F1"/>
+  <rect x="32" y="71" width="36" height="4" rx="2" fill="#C2D5F1"/>
+  <path d="m62 56 34 29-15 1 8 17-10 5-8-18-10 12 1-46Z" fill="#163B71" fill-opacity=".23"/>
+  <path d="m58 52 34 29-15 1 8 17-10 5-8-18-10 12 1-46Z" fill="#FFFFFF" stroke="#2554A2" stroke-width="3" stroke-linejoin="round"/>
+  <path d="m96 43 2.3 5.7L104 51l-5.7 2.3L96 59l-2.3-5.7L88 51l5.7-2.3L96 43Z" fill="#C9E5FF"/>
+</svg>
