@@ -165,6 +165,13 @@ const SidePanel = () => {
               setInputEnabled(true);
               setShowStopButton(false);
               setIsReplaying(false);
+              if (content) {
+                appendMessage({
+                  actor: Actors.PLANNER,
+                  content,
+                  timestamp,
+                });
+              }
               break;
             case ExecutionState.TASK_FAIL:
               setIsFollowUpMode(true);

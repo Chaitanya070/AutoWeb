@@ -136,9 +136,8 @@ export class Executor {
         this.context.actionResults.push(new ActionResult({ error: message, includeInMemory: true }));
         this.context.replanRequested = true;
         this.context.consecutiveFailures++;
-        if (this.context.consecutiveFailures >= this.context.options.maxFailures) {
-          throw new MaxFailuresReachedError(t('exec_errors_maxFailuresReached'));
-        }
+        // A premature completion is a planning correction, not an execution failure.
+        // Let the Navigator continue so it can complete or verify the unfinished work.
         return false;
       }
       logger.info('✅ Planner confirms task completion');
@@ -196,7 +195,6 @@ export class Executor {
           if (this.checkTaskCompletion(latestPlanOutput)) {
             break;
           }
-          if (latestPlanOutput?.result?.done) continue;
         }
 
         // Execute navigator

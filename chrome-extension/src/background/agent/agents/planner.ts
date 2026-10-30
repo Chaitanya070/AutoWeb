@@ -111,9 +111,11 @@ export class PlannerAgent extends BaseAgent<typeof plannerOutputSchema, PlannerO
         })) as ExecutionPlanStep[],
       };
 
-      // If task is done, emit the final answer; otherwise emit next steps
-      const eventMessage = cleanedPlan.done ? cleanedPlan.final_answer : cleanedPlan.next_steps;
-      this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_OK, eventMessage);
+      // Final answers are emitted by the executor only after task completion is verified.
+      // Showing them here exposes provisional answers and duplicates the task completion message.
+      if (!cleanedPlan.done && cleanedPlan.next_steps) {
+        this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_OK, cleanedPlan.next_steps);
+      }
       logger.info('Planner output', JSON.stringify(cleanedPlan, null, 2));
 
       return {
