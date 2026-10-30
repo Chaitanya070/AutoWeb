@@ -216,6 +216,11 @@ const SidePanel = () => {
               return;
           }
           break;
+        case Actors.RESULT:
+          if (state === ExecutionState.STEP_OK) {
+            skip = false;
+          }
+          break;
         case Actors.NAVIGATOR:
           switch (state) {
             case ExecutionState.STEP_START:
@@ -954,8 +959,9 @@ const SidePanel = () => {
       let errorMessage = t('chat_stt_microphone_accessFailed');
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
-          errorMessage += `${t('chat_stt_microphone_grantPermission')} Opening the microphone permission page...`;
-          chrome.tabs.create({ url: chrome.runtime.getURL('permission/index.html'), active: true }, tab => {
+          errorMessage += `${t('chat_stt_microphone_grantPermission')} A browser permission prompt will open. Allow it, then click the mic again.`;
+          const permissionUrl = `${chrome.runtime.getURL('permission/index.html')}?request=1`;
+          chrome.tabs.create({ url: permissionUrl, active: true }, tab => {
             if (chrome.runtime.lastError || !tab.id) {
               appendMessage({
                 actor: Actors.SYSTEM,

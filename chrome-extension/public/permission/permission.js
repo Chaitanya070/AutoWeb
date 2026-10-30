@@ -8,10 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   requestButton.textContent = chrome.i18n.getMessage('permissions_microphone_grantButton');
 
-  requestButton.addEventListener('click', async () => {
+  const requestMicrophonePermission = async () => {
     try {
       statusText.textContent = chrome.i18n.getMessage('permissions_microphone_requesting');
       statusText.className = '';
+      requestButton.disabled = true;
 
       // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -44,8 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       statusText.textContent = '❌ ' + errorMessage;
       statusText.className = 'error';
+      requestButton.disabled = false;
     }
-  });
+  };
+
+  requestButton.addEventListener('click', requestMicrophonePermission);
+
+  // Opening this page from the chat mic button should surface Chrome's native prompt
+  // immediately instead of requiring a second, easily missed click on this page.
+  if (new URLSearchParams(window.location.search).get('request') === '1') {
+    void requestMicrophonePermission();
+  }
 
   // Check if permission is already granted
   navigator.permissions

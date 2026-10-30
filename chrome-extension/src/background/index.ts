@@ -117,13 +117,14 @@ chrome.runtime.onConnect.addListener(port => {
           case 'follow_up_task': {
             if (!message.task) return port.postMessage({ type: 'error', error: t('bg_cmd_followUpTask_noTask') });
             if (!message.tabId) return port.postMessage({ type: 'error', error: t('bg_errors_noTabId') });
+            if (!message.taskId) return port.postMessage({ type: 'error', error: t('bg_errors_noTaskId') });
 
-            if (!currentExecutor) return port.postMessage({ type: 'error', error: t('bg_cmd_followUpTask_cleaned') });
             await runExclusiveTask(async () => {
-              const executor = currentExecutor;
-              if (!executor) throw new Error(t('bg_cmd_followUpTask_cleaned'));
               await browserContext.switchTab(message.tabId);
-              executor.addFollowUpTask(message.task);
+              // Each follow-up gets a clean plan and validator context while keeping the
+              // same chat session and current browser tab.
+              const executor = await setupExecutor(message.taskId, message.task, browserContext);
+              currentExecutor = executor;
               await subscribeToExecutorEvents(executor);
               try {
                 await executor.execute();

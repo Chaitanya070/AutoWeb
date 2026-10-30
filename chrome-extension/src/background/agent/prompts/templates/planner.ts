@@ -37,7 +37,7 @@ ${commonSecurityRules}
       * Set "next_steps" to empty string (since the task is complete)
       * Set "execution_plan" to an empty array
       * The final_answer should be a complete, user-friendly response that directly addresses what the user asked for
-  4. Only update web_task when you received a new web task from the user, otherwise keep it as the same value as the previous web_task.
+  4. Keep web_task consistent across planning cycles for the current request. Reassess it for each new user request or follow-up.
 
 # TASK COMPLETION VALIDATION:
 When determining if a task is "done":
