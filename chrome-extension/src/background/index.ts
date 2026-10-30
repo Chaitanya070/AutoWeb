@@ -200,7 +200,7 @@ chrome.runtime.onConnect.addListener(port => {
               }
 
               // Transcribe audio
-              const transcribedText = await speechToTextService.transcribeAudio(base64Audio);
+              const transcribedText = await speechToTextService.transcribeAudio(base64Audio, message.mimeType);
 
               logger.info('Speech-to-text completed successfully');
               return port.postMessage({

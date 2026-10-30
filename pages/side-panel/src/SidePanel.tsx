@@ -855,67 +855,20 @@ const SidePanel = () => {
     }
 
     try {
-      // First check if permission is already granted
-      const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-
-      if (permissionStatus.state === 'denied') {
-        appendMessage({
-          actor: Actors.SYSTEM,
-          content: t('chat_stt_microphone_permissionDenied'),
-          timestamp: Date.now(),
-        });
-        return;
-      }
-
-      // If permission is not granted, open permission page
-      if (permissionStatus.state !== 'granted') {
-        const permissionUrl = chrome.runtime.getURL('permission/index.html');
-
-        // Open permission page in a new window
-        chrome.windows.create(
-          {
-            url: permissionUrl,
-            type: 'popup',
-            width: 500,
-            height: 600,
-          },
-          createdWindow => {
-            if (createdWindow?.id) {
-              // Listen for window close to check permission status
-              chrome.windows.onRemoved.addListener(function onWindowClose(windowId) {
-                if (windowId === createdWindow.id) {
-                  chrome.windows.onRemoved.removeListener(onWindowClose);
-                  // Check permission status after window closes
-                  setTimeout(async () => {
-                    try {
-                      const newPermissionStatus = await navigator.permissions.query({
-                        name: 'microphone' as PermissionName,
-                      });
-                      // Only retry if permission was granted
-                      if (newPermissionStatus.state === 'granted') {
-                        handleMicClick();
-                      }
-                      // If denied or prompt, do nothing - let user manually try again
-                    } catch (error) {
-                      console.error('Failed to check permission status:', error);
-                    }
-                  }, 500);
-                }
-              });
-            }
-          },
-        );
-        return;
-      }
-
-      // Permission granted - proceed with recording
+      // Request permission directly from the side panel while the user gesture is active.
+      // Permission.query('microphone') is not consistently supported and can block recording.
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       // Clear previous audio chunks
       audioChunksRef.current = [];
 
-      // Create MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream);
+      // Pick a format the browser can actually record and send that MIME type with the audio.
+      const supportedMimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(
+        mimeType => MediaRecorder.isTypeSupported(mimeType),
+      );
+      const mediaRecorder = supportedMimeType
+        ? new MediaRecorder(stream, { mimeType: supportedMimeType })
+        : new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
       // Handle data available event
@@ -932,12 +885,18 @@ const SidePanel = () => {
 
         if (audioChunksRef.current.length > 0) {
           // Create audio blob
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const mimeType = mediaRecorder.mimeType || audioChunksRef.current[0]?.type || 'audio/webm';
+          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
 
           // Convert blob to base64
           const reader = new FileReader();
           reader.onloadend = () => {
-            const base64Audio = reader.result as string;
+            const base64Audio = reader.result;
+            if (typeof base64Audio !== 'string') {
+              appendMessage({ actor: Actors.SYSTEM, content: t('chat_stt_processingFailed'), timestamp: Date.now() });
+              setIsProcessingSpeech(false);
+              return;
+            }
 
             // Setup connection if not exists
             if (!portRef.current) {
@@ -947,9 +906,11 @@ const SidePanel = () => {
             // Send audio to backend for speech-to-text conversion
             try {
               setIsProcessingSpeech(true);
+              if (!portRef.current) throw new Error('Could not connect to the extension background service.');
               portRef.current?.postMessage({
                 type: 'speech_to_text',
                 audio: base64Audio,
+                mimeType,
               });
             } catch (error) {
               console.error('Failed to send audio for speech-to-text:', error);
@@ -962,7 +923,14 @@ const SidePanel = () => {
               setIsProcessingSpeech(false);
             }
           };
+          reader.onerror = () => {
+            appendMessage({ actor: Actors.SYSTEM, content: t('chat_stt_processingFailed'), timestamp: Date.now() });
+            setIsProcessingSpeech(false);
+          };
           reader.readAsDataURL(audioBlob);
+        } else {
+          appendMessage({ actor: Actors.SYSTEM, content: t('chat_stt_processingFailed'), timestamp: Date.now() });
+          setIsProcessingSpeech(false);
         }
       };
 

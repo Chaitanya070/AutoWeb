@@ -42,7 +42,7 @@ export class SpeechToTextService {
     }
   }
 
-  async transcribeAudio(base64Audio: string): Promise<string> {
+  async transcribeAudio(base64Audio: string, mimeType = 'audio/webm'): Promise<string> {
     try {
       logger.info('Starting audio transcription...');
 
@@ -56,7 +56,7 @@ export class SpeechToTextService {
           {
             type: 'media',
             data: base64Audio,
-            mimeType: 'audio/webm',
+            mimeType,
           },
         ],
       });
