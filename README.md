@@ -127,6 +127,7 @@ This repository is organized as a pnpm workspace monorepo.
 │   ├── side-panel/            React chat, message display, input, history
 │   ├── options/               React settings for providers and extension behavior
 │   └── content/               Content script entry point
+├── website/                    Static Vercel landing page and team extension download
 ├── packages/
 │   ├── storage/               Chrome storage models for settings and chat history
 │   ├── i18n/                  Source locale messages and localization generator
@@ -306,6 +307,10 @@ pnpm --filter @extension/content-script build
 ```
 
 Unit tests use Vitest and currently live under `chrome-extension/src/**/__tests__/`. Keep tests fast and deterministic by mocking network and browser APIs. The project also uses ESLint, Prettier, TypeScript, Vite, and Turbo.
+
+### Team download website
+
+The static landing page and Chrome/Edge team download are in [`website/`](website/). To publish it on Vercel, set the Vercel project's root directory to `website`; follow [`website/README.md`](website/README.md) for deployment and extension archive refresh steps. The page distributes an unpacked-install ZIP because AutoWeb does not currently have a browser-store listing.
 
 ### Working with localization
 
