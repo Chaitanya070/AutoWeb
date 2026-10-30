@@ -167,7 +167,7 @@ const SidePanel = () => {
               setIsReplaying(false);
               if (content) {
                 appendMessage({
-                  actor: Actors.PLANNER,
+                  actor: Actors.RESULT,
                   content,
                   timestamp,
                 });
