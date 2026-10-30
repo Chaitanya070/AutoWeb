@@ -954,7 +954,16 @@ const SidePanel = () => {
       let errorMessage = t('chat_stt_microphone_accessFailed');
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
-          errorMessage += t('chat_stt_microphone_grantPermission');
+          errorMessage += `${t('chat_stt_microphone_grantPermission')} Opening the microphone permission page...`;
+          chrome.tabs.create({ url: chrome.runtime.getURL('permission/index.html'), active: true }, tab => {
+            if (chrome.runtime.lastError || !tab.id) {
+              appendMessage({
+                actor: Actors.SYSTEM,
+                content: chrome.runtime.lastError?.message || t('chat_stt_microphone_permissionDenied'),
+                timestamp: Date.now(),
+              });
+            }
+          });
         } else if (error.name === 'NotFoundError') {
           errorMessage += t('chat_stt_microphone_notFound');
         } else {
